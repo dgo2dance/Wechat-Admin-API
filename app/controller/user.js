@@ -7,6 +7,7 @@ class UserController extends Controller {
     this.UserCreateTransfer = {
       username: {type: 'string', required: true, allowEmpty: false,min: 2},
       password: {type: 'password', required: true, allowEmpty: false, min: 6},
+      role: {type: 'string', required: true},
     }
   }
 
@@ -18,9 +19,9 @@ class UserController extends Controller {
     // 组装参数
     const payload = ctx.request.body || {}
     // 调用 Service 进行业务处理
-    const res = await service.user.create(payload)
+     await service.user.create(payload)
     // 设置响应内容和响应状态码
-    ctx.helper.success({ctx, res})
+    ctx.helper.success({ctx, res:true})
   }
 
   // 删除单个用户
@@ -31,7 +32,7 @@ class UserController extends Controller {
     // 调用 Service 进行业务处理
     await service.user.destroy(id)
     // 设置响应内容和响应状态码
-    ctx.helper.success({ctx})
+    ctx.helper.success({ctx,res:true})
   }
 
   // 修改用户
@@ -42,9 +43,11 @@ class UserController extends Controller {
     const { id } = ctx.params
     const payload = ctx.request.body || {}
     // 调用 Service 进行业务处理
-    await service.user.update(id, payload)
+    let filterData = ctx.helper.filterObject(payload, ['realname', 'phone', 'role', 'email', 'locked','sex', 'avatar']);
+
+    await service.user.update(id, filterData)
     // 设置响应内容和响应状态码
-    ctx.helper.success({ctx})
+    ctx.helper.success({ctx,res:true})
   }
  
   // 获取单个用户

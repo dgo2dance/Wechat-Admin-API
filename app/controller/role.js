@@ -32,21 +32,19 @@ class RoleController extends Controller {
     // 调用 Service 进行业务处理
     await service.role.destroy(id)
     // 设置响应内容和响应状态码
-    ctx.helper.success({ctx})
+    ctx.helper.success({ctx,res:true})
   }
 
   // 修改角色
   async update() {
     const { ctx, service } = this
-    // 校验参数
-    ctx.validate(this.createRule)
     // 组装参数
     const { id } = ctx.params
     const payload = ctx.request.body || {}
     // 调用 Service 进行业务处理
-    await service.role.update(id, payload)
+    await service.role.update(id, {name:payload.name})
     // 设置响应内容和响应状态码
-    ctx.helper.success({ctx})
+    ctx.helper.success({ctx,res:true})
   }
 
   // 获取单个角色
@@ -81,7 +79,7 @@ class RoleController extends Controller {
     // 调用 Service 进行业务处理
     const result = await service.role.removes(payload)
     // 设置响应内容和响应状态码
-    ctx.helper.success({ctx})
+    ctx.helper.success({ctx,res:result})
   }
 
 }

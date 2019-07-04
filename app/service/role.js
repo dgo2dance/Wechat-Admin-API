@@ -3,7 +3,16 @@ const Service = require('egg').Service
 class RoleService extends Service {
   // create======================================================================================================>
   async create(payload) {
-    return this.ctx.model.Role.create(payload) 
+    const { ctx, service } = this
+    const isExitedName =   await ctx.model.Role.findOne({name:payload.name});
+    if(isExitedName){
+      ctx.throw(500, 'roleName already exists ')
+    }
+    const isExitedAccess =   await ctx.model.Role.findOne({access:payload.access});
+    if(isExitedAccess){
+      ctx.throw(500, 'access already exists ')
+    }
+    return ctx.model.Role.create(payload) 
   }
 
   // destroy======================================================================================================>  

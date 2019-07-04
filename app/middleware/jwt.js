@@ -10,15 +10,19 @@ module.exports = (options, app) => {
             authToken = authToken.substring(7)
             const res = verifyToken(authToken) // 解密获取的Token
             if (res.userid) {
-
                 const redis_token = await ctx.app.redis.get('loginToken_'+res.username) // 获取保存的token
-
                 if (authToken === redis_token) {
                     ctx.locals.userid = res.userid
-                    ctx.locals.username = res.username
-                    await next()
+                    ctx.locals.username = res.username              
+                    ctx.locals.access = res.access
+                    if(options &&  options.access !=  undefined && options.access > res.access ){
+                        ctx.body = { code: 50013, msg: '权限不足' }
+                    }else{
+                        await next()
+                    }
+                    
                 } else {
-                    ctx.body = { code: 50012, msg: '您的账号已在其他地方登录' }
+                    ctx.body = { code: 50012, msg: '登录状态已过期' }
                 }
             } else {
                 ctx.body = { code: 50012, msg: '登录状态已过期' }
