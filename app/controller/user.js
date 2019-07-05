@@ -3,12 +3,12 @@ const Controller = require('egg').Controller
 class UserController extends Controller {
   constructor(ctx) {
     super(ctx)
-
-    this.UserCreateTransfer = {
-      username: {type: 'string', required: true, allowEmpty: false,min: 2},
-      password: {type: 'password', required: true, allowEmpty: false, min: 6},
-      role: {type: 'string', required: true},
-    }
+    this.UserCreateTransfer = ctx.app.Joi.object().keys({
+      username: ctx.app.Joi.string().required().min(2).max(20).regex(/^[a-zA-Z0-9_]{2,20}$/).label(ctx.__('Username')),
+      password: ctx.app.Joi.string().required().min(6).max(30).label(ctx.__('Password')),
+      role: ctx.app.Joi.string().required().label(ctx.__('Role ID'))
+    })
+  
   }
 
   // 创建用户

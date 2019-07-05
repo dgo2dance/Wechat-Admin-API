@@ -1,9 +1,9 @@
 // had enabled by egg
 // exports.static = true;
-exports.validate = {
+exports.joi = {
   enable: true,
-  package: 'egg-validate',
-}
+  package: 'egg-joi',
+};
 
 exports.bcrypt = {
   enable: true,
@@ -27,4 +27,9 @@ exports.cors = {
 exports.redis = {
   enable: true,
   package: 'egg-redis',
+};
+
+exports.bizerror = {
+  enable: true,
+  package: 'egg-bizerror',
 };

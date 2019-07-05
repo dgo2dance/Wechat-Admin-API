@@ -4,10 +4,10 @@ class RoleController extends Controller {
   constructor(ctx) {
     super(ctx)
 
-    this.createRule = {
-      name: { type: 'string', required: true, allowEmpty: false },
-      access: { type: 'string', required: true, allowEmpty: false }
-    }
+    this.createRule = ctx.app.Joi.object().keys({
+      name: ctx.app.Joi.string().required().min(2).max(10).label(ctx.__('Role name')),
+      access: ctx.app.Joi.number().min(0).max(100).required().label(ctx.__('Role value'))
+    })
 
   }
 
@@ -15,15 +15,15 @@ class RoleController extends Controller {
   async create() {
     const { ctx, service } = this
     // 校验参数
-    ctx.validate(this.createRule)
+    this.ctx.validate(this.createRule);
     // 组装参数
     const payload = ctx.request.body || {}
     // 调用 Service 进行业务处理
     const res = await service.role.create(payload)
     // 设置响应内容和响应状态码
-    ctx.helper.success({ctx, res})
+    ctx.helper.success({ ctx, res })
   }
-  
+
   // 删除单个角色
   async destroy() {
     const { ctx, service } = this
@@ -32,7 +32,7 @@ class RoleController extends Controller {
     // 调用 Service 进行业务处理
     await service.role.destroy(id)
     // 设置响应内容和响应状态码
-    ctx.helper.success({ctx,res:true})
+    ctx.helper.success({ ctx, res: true })
   }
 
   // 修改角色
@@ -42,9 +42,9 @@ class RoleController extends Controller {
     const { id } = ctx.params
     const payload = ctx.request.body || {}
     // 调用 Service 进行业务处理
-    await service.role.update(id, {name:payload.name})
+    await service.role.update(id, { name: payload.name })
     // 设置响应内容和响应状态码
-    ctx.helper.success({ctx,res:true})
+    ctx.helper.success({ ctx, res: true })
   }
 
   // 获取单个角色
@@ -55,7 +55,7 @@ class RoleController extends Controller {
     // 调用 Service 进行业务处理
     const res = await service.role.show(id)
     // 设置响应内容和响应状态码
-    ctx.helper.success({ctx, res})
+    ctx.helper.success({ ctx, res })
   }
 
   // 获取所有角色(分页/模糊)
@@ -66,7 +66,7 @@ class RoleController extends Controller {
     // 调用 Service 进行业务处理
     const res = await service.role.index(payload)
     // 设置响应内容和响应状态码
-    ctx.helper.success({ctx, res})
+    ctx.helper.success({ ctx, res })
   }
 
   // 删除所选角色(条件id[])
@@ -79,7 +79,7 @@ class RoleController extends Controller {
     // 调用 Service 进行业务处理
     const result = await service.role.removes(payload)
     // 设置响应内容和响应状态码
-    ctx.helper.success({ctx,res:result})
+    ctx.helper.success({ ctx, res: result })
   }
 
 }

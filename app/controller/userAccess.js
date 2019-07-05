@@ -10,25 +10,24 @@ class UserAccessController extends Controller {
 
   constructor(ctx) {
     super(ctx)
-
-    this.UserLoginTransfer = {
-      username: { type: 'string', required: true, allowEmpty: false, min: 3, max: 16, format: /[a-zA-Z0-9_]{3,16}/ },
-      password: { type: 'password', required: true, allowEmpty: false, min: 6, max: 30 },
-    }
-    this.UserRegTransfer = {
-      username: { type: 'string', required: true, allowEmpty: false, min: 3, max: 16, format: /[a-zA-Z0-9_]{3,16}/ },
-      password: { type: 'password', required: true, allowEmpty: false, min: 6, max: 30 },
-      email: { type: 'email', required: false, allowEmpty: true },
-      phone: { type: 'string', format: /^1[3456789]\d{9}$/ , required: false, allowEmpty: true},
-    }
-    this.UserResetPswTransfer = {
-      password: { type: 'password', required: true, allowEmpty: false, min: 6, max: 30 },
-      oldPassword: { type: 'password', required: true, allowEmpty: false, min: 6, max: 30 }
-    }
-    this.UserUpdateTransfer = {
-      email: { type: 'email', required: false, allowEmpty: true },
-      phone: { type: 'string', format: /^1[3456789]\d{9}$/, required: false, allowEmpty: true },
-    }
+    this.UserLoginTransfer = ctx.app.Joi.object().keys({
+      username: ctx.app.Joi.string().required().min(2).max(20).regex(/^[a-zA-Z0-9_]{2,20}$/).label(ctx.__('Username')),
+      password: ctx.app.Joi.string().required().min(6).max(30).label(ctx.__('Password')),
+    })
+    this.UserRegTransfer = ctx.app.Joi.object().keys({
+      username: ctx.app.Joi.string().required().min(2).max(20).regex(/^[a-zA-Z0-9_]{2,20}$/).label(ctx.__('Username')),
+      password: ctx.app.Joi.string().required().min(6).max(30).label(ctx.__('Password')),
+      email: ctx.app.Joi.string().email().label(ctx.__('Email')),
+      phone: ctx.app.Joi.string().regex(/^1[3456789]\d{9}$/).label(ctx.__('Phone')),
+    })
+    this.UserResetPswTransfer = ctx.app.Joi.object().keys({ 
+      password: ctx.app.Joi.string().required().min(6).max(30).label(ctx.__('Password')),
+      oldPassword: ctx.app.Joi.string().required().min(6).max(30).label(ctx.__('Old password')),
+    })
+    this.UserUpdateTransfer = ctx.app.Joi.object().keys({ 
+      email: ctx.app.Joi.string().email().label(ctx.__('Email')),
+      phone: ctx.app.Joi.string().regex(/^1[3456789]\d{9}$/).label(ctx.__('Phone')),
+    })
   }
 
   // 用户登入
