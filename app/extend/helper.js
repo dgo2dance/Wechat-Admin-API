@@ -4,10 +4,7 @@ const path = require('path')
 const jwt = require('jsonwebtoken') //引入jsonwebtoken
 
 const moment = require('moment')
-const {
-  Wechaty,
-  Message,
-} = require('wechaty')
+
 // 格式化时间
 exports.formatTime = time => moment(time).format('YYYY-MM-DD HH:mm:ss')
 
@@ -37,42 +34,3 @@ exports.filterObject = (raw,allowed)=>{
   }, {});
 }
 
-exports.wechat = {
-  getWechat(obj){
-    return new Promise((reslove,reject)=>{
-      const bot = new Wechaty()
-      console.log(obj.ctx.state);
-      obj.app.wechatList[obj.ctx.state.userid] = bot;
-      bot.on('scan', onScan)
-      bot.on('login', onLogin)
-      bot.on('logout', onLogout)
-      bot.on('message', onMessage)
-      bot.on('error', onError)
-  
-      bot.start().catch(console.error)
-  
-      function onScan(qrcode, status) {
-          console.log(qrcode);
-          reslove('https://api.qrserver.com/v1/create-qr-code/?data='+qrcode);
-      }
-      function onLogin(user) {
-          console.log(`${user} login`)
- 
-      }
-      function onLogout(user) {
-          console.log(`${user} logout`)
-      }
-      function onError(e) {
-          console.error(e)
-      }
-      async function onMessage(msg) {
-      }
-  
-    });    
-     
-  },
- async findAll(bot){
-    const contactList = await bot.Contact.findAll() 
-    return contactList;
-  }
-}

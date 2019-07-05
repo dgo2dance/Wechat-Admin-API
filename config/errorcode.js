@@ -33,6 +33,11 @@ module.exports = {
         status:533 ,
         code: '10021',
         message: 'Role already exists'
+    },
+    'WECHAT_NOT_LOGIN': {
+        status:533 ,
+        code: '10031',
+        message: 'Wechat not login'
     }
 }
 

@@ -14,5 +14,5 @@ module.exports = {
    'Email':'邮箱',
    'Phone':'手机号码',
    'Old password':'旧密码',
-   '':'',
+   'Wechat not login':'请先登录微信',
 };
