@@ -36,5 +36,8 @@ module.exports = app => {
 
   //wechat
   router.get('/api/wechat/login', jwt, controller.wechat.login)
-  router.get('/api/wechat/index', jwt, controller.wechat.index)
+  router.get('/api/wechat/friends', jwt, controller.wechat.friends)
+  router.get('/api/wechat/rooms', jwt, controller.wechat.rooms)
+  router.get('/api/wechat/rooms/members', jwt, controller.wechat.RoomMembers)
+  router.get('/api/wechat/rooms/members/add', jwt, controller.wechat.RoomMembersAdd)
 }
