@@ -12,22 +12,22 @@ class UserAccessService extends Service {
     let verifyPsw = await ctx.compare(payload.password, user.password)
     !verifyPsw  && ctx.throwBizError('USER_PASSWORD_ERROR')
     let roleData = await service.role.find(user.role)
-    const token = ctx.helper.loginToken({ userid: user._id, username: user.username, access: roleData.access }, 7200);
+    const token = ctx.helper.loginToken({ userid: user._id, username: user.username, access: roleData.access }, 7200)
     await this.app.redis.set('loginToken_' + user.username, token, 'ex', 7200) 
     return { token, expires: this.config.login_token_time, access: roleData.access }
 
   }
   async register(payload) {
-    const { ctx, service } = this;
-    let userRole = await ctx.model.Role.findOne({ access: 0 });
+    const { ctx, service } = this
+    let userRole = await ctx.model.Role.findOne({ access: 0 })
     if (!userRole) {
-      userRole = await service.role.create({ access: 0, name: '普通用户' });
+      userRole = await service.role.create({ access: 0, name: '普通用户' })
     }
-    payload.role = userRole._id;
+    payload.role = userRole._id
     return await service.user.create(payload)
   }
   async logout() {
-    return this.app.redis.del("loginToken_" + this.ctx.locals.username);
+    return this.app.redis.del('loginToken_' + this.ctx.locals.username)
   }
 
   async current() {
@@ -35,7 +35,7 @@ class UserAccessService extends Service {
     const _id = ctx.locals.userid
     const user = await service.user.find(_id, '_id username realname role phone email locked ctime sex avatar')
     !user && ctx.throwBizError('USER_NOT_EXIST')
-    return user;
+    return user
   }
 
   // 重置密码

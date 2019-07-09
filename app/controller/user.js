@@ -19,7 +19,7 @@ class UserController extends Controller {
     // 组装参数
     const payload = ctx.request.body || {}
     // 调用 Service 进行业务处理
-     await service.user.create(payload)
+    await service.user.create(payload)
     // 设置响应内容和响应状态码
     ctx.helper.success({ctx, res:true})
   }
@@ -43,7 +43,7 @@ class UserController extends Controller {
     const { id } = ctx.params
     const payload = ctx.request.body || {}
     // 调用 Service 进行业务处理
-    let filterData = ctx.helper.filterObject(payload, ['realname', 'phone', 'role', 'email', 'locked','sex', 'avatar']);
+    let filterData = ctx.helper.filterObject(payload, ['realname', 'phone', 'role', 'email', 'locked','sex', 'avatar'])
 
     await service.user.update(id, filterData)
     // 设置响应内容和响应状态码

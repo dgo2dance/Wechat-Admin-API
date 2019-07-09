@@ -5,37 +5,37 @@ const {
   Wechaty,
   Message,
 } = require('wechaty')
-const WECHAT_API = 'https://api.qrserver.com/v1/create-qr-code/?data=';
+const WECHAT_API = 'https://api.qrserver.com/v1/create-qr-code/?data='
 
 class WechatService extends Service {
   constructor(app) {
     super(app)
-    let data = this.app.wechatQueue[this.ctx.state.userid] || {};
-    this.bot = data.source;
-    this.status = data.status;
+    let data = this.app.wechatQueue[this.ctx.state.userid] || {}
+    this.bot = data.source
+    this.status = data.status
   }
   /**
    * 用户登入
    */
   async login() {
     return new Promise((reslove, reject) => {
-      const bot = new Wechaty();
+      const bot = new Wechaty()
 
       bot.on('scan', (qrcode, status) => reslove(WECHAT_API + qrcode))
       bot.on('login', (user) => {
         this.app.wechatQueue[this.ctx.state.userid] = {
           source: bot,
           status: 1,
-        };
+        }
 
       })
       bot.on('logout', (user) => {
-        this.app.wechatQueue[this.ctx.state.userid] = null;
-        delete this.app.wechatQueue[this.ctx.state.userid];
+        this.app.wechatQueue[this.ctx.state.userid] = null
+        delete this.app.wechatQueue[this.ctx.state.userid]
       })
       bot.on('error', (e) => console.error(e))
       bot.start().catch(console.error)
-    });
+    })
 
   }
   /**
@@ -43,9 +43,9 @@ class WechatService extends Service {
    * @param {*} query  查询条件
    */
   async friends(query) {
-    this.checkLogin();
-    const contactList = await this.bot.Contact.findAll();
-    return this.filterContacts(contactList || [], query);
+    this.checkLogin()
+    const contactList = await this.bot.Contact.findAll()
+    return this.filterContacts(contactList || [], query)
 
   }
 
@@ -54,10 +54,10 @@ class WechatService extends Service {
    * @param {*} topic 群聊名
    */
   async rooms({ topic }) {
-    this.checkLogin();
-    const roomList = await this.bot.Room.findAll();
+    this.checkLogin()
+    const roomList = await this.bot.Room.findAll()
     return roomList.filter(item => {
-      return topic ? item.payload.topic.indexOf(topic) >= 0 : true;
+      return topic ? item.payload.topic.indexOf(topic) >= 0 : true
     })
   }
 
@@ -71,31 +71,31 @@ class WechatService extends Service {
    * type : 1个人   2 公众号  3 未知
    */
   async RoomMembers(query) {
-    this.checkLogin();
+    this.checkLogin()
     if (query.topic) {
-      let room = await this.rooms({ topic: query.topic });
+      let room = await this.rooms({ topic: query.topic })
       if (room.length > 0) {
         let members
         if (query.name) {
-          members = await room[0].memberAll({ name: new RegExp(query.name) });
+          members = await room[0].memberAll({ name: new RegExp(query.name) })
         } else if (query.roomAlias) {
-          members = await room[0].memberAll({ roomAlias: query.roomAlias  });
+          members = await room[0].memberAll({ roomAlias: query.roomAlias  })
         } else if (query.contactAlias) {
-          members = await room[0].memberAll({ contactAlias:query.contactAlias  });
+          members = await room[0].memberAll({ contactAlias:query.contactAlias  })
         } else {
-          members = await room[0].memberAll();
+          members = await room[0].memberAll()
         }
-        return this.filterContacts(members || [], { friend: query.friend, type: query.type });
+        return this.filterContacts(members || [], { friend: query.friend, type: query.type })
       }
     }
-    return [];
+    return []
   }
   //批量添加好友
   async RoomMembersAdd(query) {
-    this.checkLogin();
-    let members = await this.RoomMembers(query);
-    this.app.wechatAddContactQueue[this.ctx.state.userid] = members;
-    this.app.runSchedule('wehcat_add_contact');
+    this.checkLogin()
+    let members = await this.RoomMembers(query)
+    this.app.wechatAddContactQueue[this.ctx.state.userid] = members
+    this.app.runSchedule('wehcat_add_contact')
   
 
   }
@@ -119,24 +119,24 @@ class WechatService extends Service {
  * address：地址
  */
   filterContacts(contacts, query) {
-    let { name, alias, friend, type, gender, province, city, address } = query;
-    console.log(query);
+    let { name, alias, friend, type, gender, province, city, address } = query
+    console.log(query)
     return contacts.filter(item => {
-      let arr = [];
-      let { payload } = item;
+      let arr = []
+      let { payload } = item
       if (friend != undefined) {
-        let bool = Number(friend) === 1 ? true : false;
-        arr.push(bool === payload.friend);
+        let bool = Number(friend) === 1 ? true : false
+        arr.push(bool === payload.friend)
       }
-      name && arr.push(payload.name.indexOf(name) >= 0);
-      alias && arr.push(payload.alias.indexOf(alias) >= 0);
-      type && arr.push(Number(type) === payload.type);
-      gender && arr.push(Number(gender) === payload.gender);
-      province && arr.push(payload.province.indexOf(province) >= 0);
-      city && arr.push(payload.city.indexOf(city) >= 0);
-      address && arr.push(payload.address.indexOf(address) >= 0);
-      console.log(arr);
-      return arr.indexOf(false) < 0;
+      name && arr.push(payload.name.indexOf(name) >= 0)
+      alias && arr.push(payload.alias.indexOf(alias) >= 0)
+      type && arr.push(Number(type) === payload.type)
+      gender && arr.push(Number(gender) === payload.gender)
+      province && arr.push(payload.province.indexOf(province) >= 0)
+      city && arr.push(payload.city.indexOf(city) >= 0)
+      address && arr.push(payload.address.indexOf(address) >= 0)
+      console.log(arr)
+      return arr.indexOf(false) < 0
     })
   }
 }

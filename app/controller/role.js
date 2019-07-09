@@ -15,7 +15,7 @@ class RoleController extends Controller {
   async create() {
     const { ctx, service } = this
     // 校验参数
-    this.ctx.validate(this.createRule);
+    this.ctx.validate(this.createRule)
     // 组装参数
     const payload = ctx.request.body || {}
     // 调用 Service 进行业务处理

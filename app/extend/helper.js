@@ -27,10 +27,10 @@ exports.loginToken = (data, expires = 7200) => {
 
 exports.filterObject = (raw,allowed)=>{
   return Object.keys(raw)
-  .filter(key => allowed.includes(key))
-  .reduce((obj, key) => {
-    obj[key] = raw[key];
-    return obj;
-  }, {});
+    .filter(key => allowed.includes(key))
+    .reduce((obj, key) => {
+      obj[key] = raw[key]
+      return obj
+    }, {})
 }
 

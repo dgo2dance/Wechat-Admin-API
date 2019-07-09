@@ -6,7 +6,7 @@ module.exports = (option, app) => {
       await next()
     } catch (err) {
       // 所有的异常都在 app 上触发一个 error 事件，框架会记录一条错误日志
-      app.emit('error', err, this);
+      app.emit('error', err, this)
      
       if (err.status === 422) {
         ctx.body = {
@@ -14,9 +14,9 @@ module.exports = (option, app) => {
           data:false,
           msg:err.details.map(item=>ctx.__(item.message)).join(',')
         }
-        return false;
+        return false
       }
-       return ctx.responseBizError(err);
+      return ctx.responseBizError(err)
     }
   }
 }

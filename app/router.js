@@ -4,7 +4,7 @@
  */
 module.exports = app => {
   const { router, controller,middleware } = app
-  const jwt = middleware.jwt();
+  const jwt = middleware.jwt()
   const adminJwt = middleware.jwt({ access:100 })
   router.get('/', controller.home.index)
 

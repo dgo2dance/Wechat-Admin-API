@@ -4,7 +4,7 @@ class UserService extends Service {
 
   async create(payload) {
     const { ctx } = this
-    const hasUserName = await ctx.model.User.findOne({ username: payload.username });
+    const hasUserName = await ctx.model.User.findOne({ username: payload.username })
     hasUserName && ctx.throwBizError('USER_IS_EXIST')
     payload.password = await ctx.genHash(payload.password)
     return ctx.model.User.create(payload)
@@ -19,16 +19,17 @@ class UserService extends Service {
 
 
   async update(_id, payload) {
-    const { ctx, service } = this
+    const { ctx } = this
     const user = await ctx.service.user.find(_id)
     !user && ctx.throwBizError('USER_NOT_EXIST')
     return ctx.model.User.findByIdAndUpdate(_id, payload)
   }
 
   async show(_id) {
-    const user = await this.ctx.service.user.find(_id)
+    const { ctx } = this
+    const user = await ctx.service.user.find(_id)
     !user && ctx.throwBizError('USER_NOT_EXIST')
-    return this.ctx.model.User.findById(_id, "_id username role ctime locked").populate('role')
+    return ctx.model.User.findById(_id, '_id username role ctime locked').populate('role')
   }
 
 
@@ -36,8 +37,8 @@ class UserService extends Service {
     const { currentPage, pageSize, isPaging, search } = payload
     let res = []
     let count = 0
-    let skip = ((Number(currentPage)) - 1) * Number(pageSize || 10);
-    let filed = "_id username realname role phone email avatar ctime locked";
+    let skip = ((Number(currentPage)) - 1) * Number(pageSize || 10)
+    let filed = '_id username realname role phone email avatar ctime locked'
     if (isPaging) {
       if (search) {
         res = await this.ctx.model.User.find({ username: { $regex: search } },filed).populate('role').skip(skip).limit(Number(pageSize)).sort({ createdAt: -1 }).exec()

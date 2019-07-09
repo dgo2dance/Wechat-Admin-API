@@ -25,9 +25,9 @@ module.exports = appInfo => {
     fileExtensions: ['.apk', '.pptx', '.docx', '.csv', '.doc', '.ppt', '.pdf', '.pages', '.wav', '.mov'], // 增加对 .apk 扩展名的支持
   },
 
-    config.bcrypt = {
-      saltRounds: 10 // default 10
-    }
+  config.bcrypt = {
+    saltRounds: 10 // default 10
+  }
 
   config.mongoose = {
     url: 'mongodb://127.0.0.1:27017/wechat',
@@ -62,19 +62,19 @@ module.exports = appInfo => {
     cookieDomain: '',
     // Cookie 默认 `1y` 一年后过期， 如果设置为 Number，则单位为 ms
     cookieMaxAge: '1y',
-  };
+  }
 
   config.bizerror = {
     breakDefault: false, // disable default error handler
     sendClientAllParams: false, // return error bizParams to user
     interceptAllError: false, // handle all exception, not only bizError exception
-  };
+  }
   config.joi = {
     options: {},
     locale: {
       'zh-cn': {
         any: {
-          required: "是必须的",
+          required: '是必须的',
 
         },
         string: {
@@ -93,9 +93,9 @@ module.exports = appInfo => {
       }
     },
     throw: true, // throw immediately when capture exception
-    throwHandle: (error) => { return error; }, // error message format when throw is true
-    errorHandle: (error) => { return error; }, // error message format when throw is false
-    resultHandle: (result) => { return { result }; } // fromat result
-  };
+    throwHandle: (error) => { return error }, // error message format when throw is true
+    errorHandle: (error) => { return error }, // error message format when throw is false
+    resultHandle: (result) => { return { result } } // fromat result
+  }
   return config
 }
