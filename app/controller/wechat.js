@@ -1,4 +1,5 @@
 const Controller = require('egg').Controller
+const exportFromJSON = require('export-from-json')
 class WechatController extends Controller {
   // 用户登入
   async login() {
@@ -35,7 +36,40 @@ class WechatController extends Controller {
     const res =  await  service.wechat.RoomMembersAdd(query)
     ctx.helper.success({ ctx, res })
   }
+  //导出
+  async export(){
+    const { ctx, service } = this
+    const query  =  ctx.query  || {}
+    const data =  await  service.wechat.export(query)
+    const fileName = 'data'
+    const exportType = 'xls'
+    let result =  exportFromJSON({
+      data,
+      fileName,
+      exportType,
+      processor(content, type, fileName) {
+        switch (type) {
+            case 'txt':
+                ctx.set('Content-Type', 'text/plain')
+                break
+            case 'json':
+                ctx.set('Content-Type', 'text/plain')
+                break
+            case 'csv':
+                ctx.set('Content-Type', 'text/csv')
+                break
+            case 'xls':
+                ctx.set('Content-Type', 'application/vnd.ms-excel')
+                break
+        }
+        ctx.set('Content-disposition', 'attachment;filename=' + fileName)
+        return content
+      }
+    }) 
+    ctx.status = 200;
+    ctx.body = result;
     
+  } 
 }
 
 module.exports = WechatController
