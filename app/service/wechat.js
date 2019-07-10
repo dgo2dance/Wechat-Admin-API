@@ -79,9 +79,9 @@ class WechatService extends Service {
         if (query.name) {
           members = await room[0].memberAll({ name: new RegExp(query.name) })
         } else if (query.roomAlias) {
-          members = await room[0].memberAll({ roomAlias: query.roomAlias  })
+          members = await room[0].memberAll({ roomAlias: query.roomAlias })
         } else if (query.contactAlias) {
-          members = await room[0].memberAll({ contactAlias:query.contactAlias  })
+          members = await room[0].memberAll({ contactAlias: query.contactAlias })
         } else {
           members = await room[0].memberAll()
         }
@@ -90,14 +90,15 @@ class WechatService extends Service {
     }
     return []
   }
-  //批量添加好友
+  /**
+   * 批量添加好友 (只有wxid非wxid_开头的才可以正常添加。)
+   * @param {*} query 
+   */
   async RoomMembersAdd(query) {
     this.checkLogin()
     let members = await this.RoomMembers(query)
-    this.app.wechatAddContactQueue[this.ctx.state.userid] = members
+    this.app.wechatAddContactQueue.push({ key: this.ctx.state.userid, bot: this.app.wechatQueue[this.ctx.state.userid], data: members })
     this.app.runSchedule('wehcat_add_contact')
-  
-
   }
 
   //检查是否登录
@@ -120,7 +121,6 @@ class WechatService extends Service {
  */
   filterContacts(contacts, query) {
     let { name, alias, friend, type, gender, province, city, address } = query
-    console.log(query)
     return contacts.filter(item => {
       let arr = []
       let { payload } = item

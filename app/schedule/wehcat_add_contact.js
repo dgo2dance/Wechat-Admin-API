@@ -11,19 +11,18 @@ class WechatAddContact extends Subscription {
 
   // subscribe 是真正定时任务执行时被运行的函数
   async subscribe() {
-    let key = this.ctx.state.userid
-    let members = this.ctx.app.wechatAddContactQueue[key]
-    let bot = this.ctx.app.wechatQueue[key]
-    console.log(this.ctx.app)
-    if (members && members.length > 0) {
-      let member = members.splice(0, 1)
-      console.log(member)
-      let status = await bot.Friendship.add(member, '很高兴地认识你，哈哈')
-      console.log(status)
-    }else{
-      console.log('success')
+    let queue = this.ctx.app.wechatAddContactQueue
+    for (let i = 0; i < queue.length; i++) {
+      let item = queue[i];
+      if (item.bot.source && item.bot.status === 1 && item.data.length > 0) {
+        await item.bot.source.Friendship.add(item.data[0], '很高兴地认识你，哈哈');
+        // this.ctx.logger.info(`Wechat add Friend: user ${item.key}   add ${item.data[0].payload.name} success`);
+        item.data.shift();
+      } else {
+        queue.splice(i--, 1);
+      }
     }
-
+   
   }
 }
 
