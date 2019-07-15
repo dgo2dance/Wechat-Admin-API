@@ -1,16 +1,14 @@
 'use strict'
 
 const Service = require('egg').Service
-const {
-  Wechaty,
-  Message,
-} = require('wechaty')
-const WECHAT_API = 'https://api.qrserver.com/v1/create-qr-code/?data='
-
+const TencentAI = require('tencent-ai-nodejs-sdk')
+const { Wechaty } = require('wechaty');
+const { puppet } = require('wechaty-puppet-puppeteer')
 class WechatService extends Service {
   constructor(app) {
     super(app)
-    let data = this.app.wechatQueue[this.ctx.state.userid] || {}
+    let data = this.app.wechatQueue[this.ctx.state.userid] || {};
+    this.data = data;
     this.bot = data.source
     this.status = data.status
   }
@@ -19,13 +17,20 @@ class WechatService extends Service {
    */
   async login() {
     return new Promise((reslove, reject) => {
-      const bot = new Wechaty()
-
-      bot.on('scan', (qrcode, status) => reslove(WECHAT_API + qrcode))
+      const bot = new Wechaty({
+        puppet,
+        name: 'wechat-' + this.ctx.state.userid
+      })
+      bot.on('scan', (qrcode, status) => reslove(this.config.wechat.loginUrl + qrcode))
       bot.on('login', (user) => {
         this.app.wechatQueue[this.ctx.state.userid] = {
           source: bot,
           status: 1,
+          ai: {
+            roomArr: [],
+            personArr: [],
+            config: {}
+          }
         }
 
       })
@@ -97,8 +102,79 @@ class WechatService extends Service {
   async RoomMembersAdd(query) {
     this.checkLogin()
     let members = await this.RoomMembers(query)
-    this.app.wechatAddContactQueue.push({ key: this.ctx.state.userid, bot: this.app.wechatQueue[this.ctx.state.userid], data: members })
+    this.app.wechatAddContactQueue.push({ key: this.ctx.state.userid, bot: this.data, data: members })
     this.app.runSchedule('wehcat_add_contact')
+  }
+  /**
+ * 设置机器人聊天
+ * @param {*} query 
+ * status 是否开启 0关闭 1开启
+ * startText 开启的返回消息
+ * startKey 开启的标识
+ * endText 关闭的返回消息
+ * endKey 关闭的标识
+ * msgKey 判断是否AI回复此消息的标识
+ */
+  async MessageAi(query) {
+    this.checkLogin();
+
+    if (this.data.ai.config.status === 1) {
+      return false;
+    }
+    this.data.ai.config = Object.assign({}, this.data.ai.config, this.config.wechat.tencentAi, query);
+    console.log( this.data.ai.config);
+    this.bot.on('message', async function (msg) {
+      let config = this.data.ai.config;
+
+      if (!config.status) {
+        return false;
+      }
+
+      let text = msg.text();
+      let hasAi =  async function(arr, flag){
+        //判断开启AI的标识
+        if (text.indexOf(config.startKey) >= 0) {
+          arr.push(flag);
+          await msg.say(config.startText)
+          return false;
+        }
+        //判断关闭AI的标识
+        if (text.indexOf(config.endKey) >= 0 && arr.indexOf(flag) >= 0) {
+          arr.splice(arr.indexOf(flag), 1);
+          await msg.say(config.endText)
+          return false;
+        }
+        //判断此消息是否开启了AI聊天
+        return arr.indexOf(flag) < 0
+      }
+      //只接受消息类型
+      if (msg.type() !== this.bot.Message.Type.Text) {
+        return false;
+      }
+      //群聊
+      if (msg.room() && !hasAi(this.data.ai.roomArr, await msg.room().topic())) {
+        return false;
+        //个人
+      } else if (!msg.room() && !hasAi(this.data.ai.personArr, msg.from().name())) {
+        return false;
+      }
+   
+      if (config.msgKey && text.indexOf(config.msgKey) < 0) {
+        return false;
+      } else if (!config.msgKey && msg.self()) {
+        return false;
+      }
+
+
+      try {
+        const data = await new TencentAI('2117405317', 'cf2rk3HHzm1nLRPA').nlpTextChat(config.msgKey ? text.split(config.msgKey)[1].trim() : text.trim())
+        await msg.say(data.data.answer)
+
+      } catch (e) {
+        console.error(e && e.message || e)
+      }
+    }.bind(this))
+
   }
   /**
    * 导出

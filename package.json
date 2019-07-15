@@ -21,6 +21,7 @@
     "puppeteer": "^1.18.1",
     "stream-to-array": "^2.3.0",
     "stream-wormhole": "^1.0.3",
+    "tencent-ai-nodejs-sdk": "^1.0.14",
     "wechaty": "^0.26.1",
     "wechaty-puppet-puppeteer": "^0.16.1"
   },

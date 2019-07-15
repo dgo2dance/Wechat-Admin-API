@@ -41,4 +41,5 @@ module.exports = app => {
   router.get('/api/wechat/rooms', jwt, controller.wechat.rooms)
   router.get('/api/wechat/rooms/members', jwt, controller.wechat.RoomMembers)
   router.get('/api/wechat/rooms/members/add', jwt, controller.wechat.RoomMembersAdd)
+  router.get('/api/wechat/message/ai', jwt, controller.wechat.MessageAi)
 }

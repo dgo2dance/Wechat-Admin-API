@@ -36,6 +36,13 @@ class WechatController extends Controller {
     const res =  await  service.wechat.RoomMembersAdd(query)
     ctx.helper.success({ ctx, res })
   }
+   //开启机器人聊天
+   async MessageAi(){
+    const { ctx, service } = this
+    const query  =  ctx.query  || {}
+    const res =  await  service.wechat.MessageAi(query)
+    ctx.helper.success({ ctx, res })
+  }
   //导出
   async export(){
     const { ctx, service } = this

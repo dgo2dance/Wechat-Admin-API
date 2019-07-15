@@ -25,9 +25,9 @@ module.exports = appInfo => {
     fileExtensions: ['.apk', '.pptx', '.docx', '.csv', '.doc', '.ppt', '.pdf', '.pages', '.wav', '.mov'], // 增加对 .apk 扩展名的支持
   },
 
-  config.bcrypt = {
-    saltRounds: 10 // default 10
-  }
+    config.bcrypt = {
+      saltRounds: 10 // default 10
+    }
 
   config.mongoose = {
     url: 'mongodb://127.0.0.1:27017/wechat',
@@ -81,9 +81,9 @@ module.exports = appInfo => {
           min: '最小为{{limit}}位',
           max: '最大为{{limit}}位',
           regex: {
-            base:'格式不正确'
+            base: '格式不正确'
           },
-          email:'格式不正确'
+          email: '格式不正确'
         },
         number: {
           base: '必须为数字',
@@ -96,6 +96,19 @@ module.exports = appInfo => {
     throwHandle: (error) => { return error }, // error message format when throw is true
     errorHandle: (error) => { return error }, // error message format when throw is false
     resultHandle: (result) => { return { result } } // fromat result
+  }
+  config.wechat = {
+    loginUrl: 'https://api.qrserver.com/v1/create-qr-code/?data=',
+    tencentAi: {
+      appId: '2117405317',
+      appKey: 'cf2rk3HHzm1nLRPA',
+      startText:'开启机器人聊天。在消息开头加上小黑，则机器人会自动回复。若想关闭，请回复，回家吧小黑',
+      startKey:'出现吧小黑',
+      endKey:'回家吧小黑',
+      endText:'机器人聊天模式已经关闭',
+      msgKey:'小黑'
+      
+    }
   }
   return config
 }
