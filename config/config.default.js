@@ -17,9 +17,15 @@ module.exports = appInfo => {
   config.security = {
     csrf: {
       enable: false,
+      ignoreJSON: true
     },
-    domainWhiteList: ['http://localhost:8000'],
+    domainWhiteList: ['http://localhost:8080'],
   }
+  config.cors = {
+    credentials: true, 
+    origin:['http://localhost:8080'],
+    allowMethods: 'GET,HEAD,PUT,POST,DELETE,PATCH'
+  };
 
   config.multipart = {
     fileExtensions: ['.apk', '.pptx', '.docx', '.csv', '.doc', '.ppt', '.pdf', '.pages', '.wav', '.mov'], // 增加对 .apk 扩展名的支持
