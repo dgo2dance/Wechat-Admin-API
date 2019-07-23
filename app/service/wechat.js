@@ -235,16 +235,16 @@ class WechatService extends Service {
       let payload = item.payload;
       return {
         'id': payload.id,
-        '名字': payload.name,
-        '性别': payload.gender === 0 ? '无' : (payload.gender === 1 ? '男' : '女'),
-        '别名': payload.alias,
-        '朋友': payload.friend ? '是' : '否',
-        '星标': payload.star ? '是' : '否',
-        '类型': payload.type === 1 ? '个人' : (payload.type === 2 ? '公众号' : '未知'),
-        '描述': payload.signature,
-        '省份': payload.province,
-        '城市': payload.city,
-        '地址': payload.address,
+        'name': payload.name,
+        'gender': payload.gender === 0 ? '无' : (payload.gender === 1 ? '男' : '女'),
+        'alias': payload.alias,
+        'friend': payload.friend ? '是' : '否',
+        'star': payload.star ? '是' : '否',
+        'type': payload.type === 1 ? '个人' : (payload.type === 2 ? '公众号' : '未知'),
+        'signature': payload.signature,
+        'province': payload.province,
+        'city': payload.city,
+        'address': payload.address,
       }
     })
     return arr;
