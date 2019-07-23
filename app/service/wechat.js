@@ -44,6 +44,12 @@ class WechatService extends Service {
 
   }
   /**
+ * 判断用户是否登入
+ */
+  async isLogin() {
+    return this.status === 1;
+  }
+  /**
    * 获取全部的朋友
    * @param {*} query  查询条件
    */
@@ -122,7 +128,7 @@ class WechatService extends Service {
       return false;
     }
     this.data.ai.config = Object.assign({}, this.data.ai.config, this.config.wechat.tencentAi, query);
-    console.log( this.data.ai.config);
+    console.log(this.data.ai.config);
     this.bot.on('message', async function (msg) {
       let config = this.data.ai.config;
 
@@ -131,7 +137,7 @@ class WechatService extends Service {
       }
 
       let text = msg.text();
-      let hasAi =  async function(arr, flag){
+      let hasAi = async function (arr, flag) {
         //判断开启AI的标识
         if (text.indexOf(config.startKey) >= 0) {
           arr.push(flag);
@@ -158,7 +164,7 @@ class WechatService extends Service {
       } else if (!msg.room() && !hasAi(this.data.ai.personArr, msg.from().name())) {
         return false;
       }
-   
+
       if (config.msgKey && text.indexOf(config.msgKey) < 0) {
         return false;
       } else if (!config.msgKey && msg.self()) {

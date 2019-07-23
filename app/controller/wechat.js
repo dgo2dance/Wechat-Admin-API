@@ -8,6 +8,13 @@ class WechatController extends Controller {
     ctx.helper.success({ ctx, res })
         
   }
+   // 判断用户是否登入
+   async isLogin() {
+    const { ctx, service } = this
+    const res =  await  service.wechat.isLogin()
+    ctx.helper.success({ ctx, res })
+        
+  }
   //获取全部的朋友
   async friends(){
     const { ctx, service } = this
