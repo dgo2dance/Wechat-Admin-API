@@ -56,7 +56,7 @@ class WechatService extends Service {
   async friends(query) {
     this.checkLogin()
     const contactList = await this.bot.Contact.findAll()
-    return this.filterContacts(contactList || [], query)
+    return this.formatContacts(this.filterContacts(contactList || [], query));
 
   }
 
@@ -189,25 +189,7 @@ class WechatService extends Service {
   async export(query) {
     this.checkLogin()
     let data = await this.friends(query)
-    let arr = data.map(function (item) {
-      // const file = await item.avatar()
-      // let avatar = await file.toBase64(file.name, true);
-      let payload = item.payload;
-      return {
-        'id': payload.id,
-        '名字': payload.name,
-        '性别': payload.gender === 0 ? '无' : (payload.gender === 1 ? '男' : '女'),
-        '别名': payload.alias,
-        '朋友': payload.friend ? '是' : '否',
-        '星标': payload.star ? '是' : '否',
-        '类型': payload.type === 1 ? '个人' : (payload.type === 2 ? '公众号' : '未知'),
-        '描述': payload.signature,
-        '省份': payload.province,
-        '城市': payload.city,
-        '地址': payload.address,
-      }
-    })
-    return arr;
+    return this.formatContacts(data);
   }
   //检查是否登录
   checkLogin() {
@@ -245,6 +227,27 @@ class WechatService extends Service {
       address && arr.push(payload.address.indexOf(address) >= 0)
       return arr.indexOf(false) < 0
     })
+  }
+  formatContacts(data) {
+    let arr = data.map(function (item) {
+      // const file = await item.avatar()
+      // let avatar = await file.toBase64(file.name, true);
+      let payload = item.payload;
+      return {
+        'id': payload.id,
+        '名字': payload.name,
+        '性别': payload.gender === 0 ? '无' : (payload.gender === 1 ? '男' : '女'),
+        '别名': payload.alias,
+        '朋友': payload.friend ? '是' : '否',
+        '星标': payload.star ? '是' : '否',
+        '类型': payload.type === 1 ? '个人' : (payload.type === 2 ? '公众号' : '未知'),
+        '描述': payload.signature,
+        '省份': payload.province,
+        '城市': payload.city,
+        '地址': payload.address,
+      }
+    })
+    return arr;
   }
 }
 
