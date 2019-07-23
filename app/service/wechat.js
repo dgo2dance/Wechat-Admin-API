@@ -220,7 +220,7 @@ class WechatService extends Service {
     return contacts.filter(item => {
       let arr = []
       let { payload } = item
-      if (friend != undefined) {
+      if (friend) {
         let bool = Number(friend) === 1 ? true : false
         arr.push(bool === payload.friend)
       }
