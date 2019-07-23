@@ -55,7 +55,13 @@ class WechatService extends Service {
    */
   async friends(query) {
     this.checkLogin()
-    const contactList = await this.bot.Contact.findAll()
+    let contactList =[];
+    if(this.data.contactList){
+      contactList = this.data.contactList;
+    }else{
+      contactList = await this.bot.Contact.findAll();
+      this.data.contactList = contactList;
+    } 
     return this.formatContacts(this.filterContacts(contactList || [], query));
 
   }
