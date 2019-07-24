@@ -1,7 +1,7 @@
 'use strict'
 
 const Service = require('egg').Service
-const TencentAI = require('tencent-ai-nodejs-sdk')
+const TencentAI = require('@khs1994/tencent-ai')
 const { Wechaty } = require('wechaty');
 const { puppet } = require('wechaty-puppet-puppeteer')
 class WechatService extends Service {
@@ -134,7 +134,6 @@ class WechatService extends Service {
       return false;
     }
     this.data.ai.config = Object.assign({}, this.data.ai.config, this.config.wechat.tencentAi, query);
-    console.log(this.data.ai.config);
     this.bot.on('message', async function (msg) {
       let config = this.data.ai.config;
 
@@ -179,7 +178,7 @@ class WechatService extends Service {
 
 
       try {
-        const data = await new TencentAI('2117405317', 'cf2rk3HHzm1nLRPA').nlpTextChat(config.msgKey ? text.split(config.msgKey)[1].trim() : text.trim())
+        const data = await new TencentAI(config.appId, config.appKey).nlp(config.msgKey ? text.split(config.msgKey)[1].trim() : text.trim())
         await msg.say(data.data.answer)
 
       } catch (e) {

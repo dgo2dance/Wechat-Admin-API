@@ -4,6 +4,7 @@
   "description": "WeChat personal account management background API based on Egg and Wechaty",
   "private": false,
   "dependencies": {
+    "@khs1994/tencent-ai": "^19.6.0-alpha.1",
     "await-stream-ready": "^1.0.1",
     "egg": "^2.0.0",
     "egg-bcrypt": "^1.0.0",
@@ -21,7 +22,6 @@
     "puppeteer": "^1.18.1",
     "stream-to-array": "^2.3.0",
     "stream-wormhole": "^1.0.3",
-    "tencent-ai-nodejs-sdk": "^1.0.14",
     "wechaty": "^0.26.1",
     "wechaty-puppet-puppeteer": "^0.16.1"
   },
