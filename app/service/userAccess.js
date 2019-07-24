@@ -13,7 +13,7 @@ class UserAccessService extends Service {
     !verifyPsw  && ctx.throwBizError('USER_PASSWORD_ERROR')
     let roleData = await service.role.find(user.role)
     const token = ctx.helper.loginToken({ userid: user._id, username: user.username, access: roleData.access }, 7200)
-    await this.app.redis.set('loginToken_' + user.username, token, 'ex', 7200) 
+    await this.app.redis.set('loginToken_' + user.username, token, 'ex', 3600*24) 
     return { token, expires: this.config.login_token_time, access: roleData.access }
 
   }

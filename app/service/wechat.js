@@ -194,7 +194,7 @@ class WechatService extends Service {
   async export(query) {
     this.checkLogin()
     let data = await this.friends(query)
-    return this.formatContacts(data);
+    return data
   }
   //检查是否登录
   checkLogin() {
