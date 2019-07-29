@@ -17,15 +17,24 @@ class WechatService extends Service {
    */
   async login() {
     return new Promise((reslove, reject) => {
+      if(this.data.codeUrl){
+        reslove(codeUrl);
+        return false;
+      }
       const bot = new Wechaty({
         puppet,
         name: 'wechat-' + this.ctx.state.userid
       })
-      bot.on('scan', (qrcode, status) => reslove(this.config.wechat.loginUrl + qrcode))
+      bot.on('scan', (qrcode, status) => {
+        const codeUrl = this.config.wechat.loginUrl + qrcode;
+        this.data.codeUrl = codeUrl
+        reslove(codeUrl)
+      })
       bot.on('login', (user) => {
         this.app.wechatQueue[this.ctx.state.userid] = {
           source: bot,
           status: 1,
+          codeUrl:'',
           ai: {
             roomArr: [],
             personArr: [],
