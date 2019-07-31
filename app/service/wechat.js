@@ -7,50 +7,63 @@ const { puppet } = require('wechaty-puppet-puppeteer')
 class WechatService extends Service {
   constructor(app) {
     super(app)
-    let data = this.app.wechatQueue[this.ctx.state.userid] || {};
-    this.data = data;
-    this.bot = data.source
-    this.status = data.status
+    if (!this.app.wechatQueue[this.ctx.state.userid]) {
+      this.app.wechatQueue[this.ctx.state.userid] = {};
+    }
+    this.data = this.app.wechatQueue[this.ctx.state.userid];
+    this.bot = this.data.source
+    this.status = this.data.status
   }
   /**
    * 用户登入
    */
   async login() {
-    return new Promise((reslove, reject) => {
-      if(this.data.codeUrl){
-        reslove(codeUrl);
-        return false;
-      }
+    return new Promise((resolve, reject) => {
+
       const bot = new Wechaty({
         puppet,
         name: 'wechat-' + this.ctx.state.userid
       })
+      this.data = this.app.wechatQueue[this.ctx.state.userid] = {
+        source: bot,
+        status: 0,
+        codeUrl: '',
+        ai: {
+          roomArr: [],
+          personArr: [],
+          config: {}
+        }
+      }
       bot.on('scan', (qrcode, status) => {
         const codeUrl = this.config.wechat.loginUrl + qrcode;
         this.data.codeUrl = codeUrl
-        reslove(codeUrl)
       })
       bot.on('login', (user) => {
-        this.app.wechatQueue[this.ctx.state.userid] = {
-          source: bot,
-          status: 1,
-          codeUrl:'',
-          ai: {
-            roomArr: [],
-            personArr: [],
-            config: {}
-          }
-        }
+        this.data.status = 1
 
       })
       bot.on('logout', (user) => {
-        this.app.wechatQueue[this.ctx.state.userid] = null
-        delete this.app.wechatQueue[this.ctx.state.userid]
+        this.loginOut();
       })
       bot.on('error', (e) => console.error(e))
-      bot.start().catch(console.error)
+      bot.start().then(()=>{
+        resolve();
+      }).catch(console.error)
+
+
     })
 
+  }
+  getCodeUrl() {
+    return this.data.codeUrl 
+  }
+  /**
+   * 微信用户登出
+   */
+  async loginOut() {
+    await this.bot.stop();
+    this.app.wechatQueue[this.ctx.state.userid] = null
+    delete this.app.wechatQueue[this.ctx.state.userid]
   }
   /**
  * 判断用户是否登入
@@ -64,13 +77,13 @@ class WechatService extends Service {
    */
   async friends(query) {
     this.checkLogin()
-    let contactList =[];
-    if(this.data.contactList){
+    let contactList = [];
+    if (this.data.contactList) {
       contactList = this.data.contactList;
-    }else{
+    } else {
       contactList = await this.bot.Contact.findAll();
       this.data.contactList = contactList;
-    } 
+    }
     return this.formatContacts(this.filterContacts(contactList || [], query));
 
   }

@@ -27,6 +27,7 @@ class UserAccessService extends Service {
     return await service.user.create(payload)
   }
   async logout() {
+    this.service.wechat.loginOut();
     return this.app.redis.del('loginToken_' + this.ctx.locals.username)
   }
 

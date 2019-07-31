@@ -21,7 +21,7 @@ module.exports = app => {
   router.post('/api/user/access/register', controller.userAccess.register)
   router.post('/api/user/access/login', controller.userAccess.login)
   router.get('/api/user/access/current', jwt, controller.userAccess.current)
-  router.get('/api/user/access/logout', jwt,controller.userAccess.logout)
+  router.post('/api/user/access/logout', jwt,controller.userAccess.logout)
   router.put('/api/user/access/resetPsw', jwt, controller.userAccess.resetPsw)
   router.put('/api/user/access/resetSelf', jwt, controller.userAccess.resetSelf)
 
