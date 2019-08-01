@@ -17,8 +17,10 @@ class UserAccessController extends Controller {
     this.UserRegTransfer = ctx.app.Joi.object().keys({
       username: ctx.app.Joi.string().required().min(2).max(20).regex(/^[a-zA-Z0-9_]{2,20}$/).label(ctx.__('Username')),
       password: ctx.app.Joi.string().required().min(6).max(30).label(ctx.__('Password')),
-      email: ctx.app.Joi.string().email().label(ctx.__('Email')),
-      phone: ctx.app.Joi.string().regex(/^1[3456789]\d{9}$/).label(ctx.__('Phone')),
+      realname: ctx.app.Joi.string().allow('').allow(null).min(1).max(20).label(ctx.__('Realname')),
+      sex: ctx.app.Joi.number().allow('').allow(null).min(0).max(1).label(ctx.__('Sex')),
+      email: ctx.app.Joi.string().allow('').allow(null).email().label(ctx.__('Email')),
+      phone: ctx.app.Joi.string().allow('').allow(null).regex(/^1[3456789]\d{9}$/).label(ctx.__('Phone')),
     })
     this.UserResetPswTransfer = ctx.app.Joi.object().keys({ 
       password: ctx.app.Joi.string().required().min(6).max(30).label(ctx.__('Password')),
@@ -27,7 +29,7 @@ class UserAccessController extends Controller {
     this.UserUpdateTransfer = ctx.app.Joi.object().keys({ 
       email: ctx.app.Joi.string().email().label(ctx.__('Email')),
       phone: ctx.app.Joi.string().regex(/^1[3456789]\d{9}$/).label(ctx.__('Phone')),
-    })
+    }).unknown();
   }
 
   // 用户登入
