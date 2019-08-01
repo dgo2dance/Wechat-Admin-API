@@ -34,9 +34,19 @@ module.exports = {
     code: 10021,
     message: 'Role already exists'
   },
-  'WECHAT_NOT_LOGIN': {
+  'WECHAT_START_FAIL': {
     status:200 ,
     code: 10031,
+    message: 'Wechat start fail'
+  },
+  'WECHAT_NOT_START': {
+    status:200 ,
+    code: 10041,
+    message: 'Wechat not start'
+  },
+  'WECHAT_NOT_LOGIN': {
+    status:200 ,
+    code: 10051,
     message: 'Wechat not login'
   }
 }

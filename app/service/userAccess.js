@@ -13,7 +13,7 @@ class UserAccessService extends Service {
     !verifyPsw  && ctx.throwBizError('USER_PASSWORD_ERROR')
     let roleData = await service.role.find(user.role)
     const token = ctx.helper.loginToken({ userid: user._id, username: user.username, access: roleData.access }, 7200)
-    await this.app.redis.set('loginToken_' + user.username, token, 'ex', 3600*24) 
+    await this.app.redis.set('loginToken_' + user.username, token, 'ex', this.config.app.tokenExpire) 
     return { token, expires: this.config.login_token_time, access: roleData.access }
 
   }
@@ -27,7 +27,7 @@ class UserAccessService extends Service {
     return await service.user.create(payload)
   }
   async logout() {
-    this.service.wechat.loginOut();
+    this.service.wechat.logout();
     return this.app.redis.del('loginToken_' + this.ctx.locals.username)
   }
 

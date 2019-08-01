@@ -103,6 +103,9 @@ module.exports = appInfo => {
     errorHandle: (error) => { return error }, // error message format when throw is false
     resultHandle: (result) => { return { result } } // fromat result
   }
+  config.app = {
+    tokenExpire: 3600*24
+  }
   config.wechat = {
     loginUrl: 'https://api.qrserver.com/v1/create-qr-code/?data=',
     tencentAi: {

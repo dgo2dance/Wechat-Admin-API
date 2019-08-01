@@ -15,4 +15,6 @@ module.exports = {
   'Phone':'手机号码',
   'Old password':'旧密码',
   'Wechat not login':'请先登录微信',
+  'Wechat start fail':'微信启动失败',
+  'Wechat not start':'微信没有启动'
 }

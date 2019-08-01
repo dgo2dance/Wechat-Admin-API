@@ -5,71 +5,98 @@ const TencentAI = require('@khs1994/tencent-ai')
 const { Wechaty } = require('wechaty');
 const { puppet } = require('wechaty-puppet-puppeteer')
 class WechatService extends Service {
-  constructor(app) {
-    super(app)
-    if (!this.app.wechatQueue[this.ctx.state.userid]) {
-      this.app.wechatQueue[this.ctx.state.userid] = {};
-    }
-    this.data = this.app.wechatQueue[this.ctx.state.userid];
-    this.bot = this.data.source
-    this.status = this.data.status
+  constructor(args) {
+    super(args);
+    let { app, ctx } = this;
+    this.data = app.wechatQueue[ctx.state.userid];
+    this.bot = this.data && this.data.bot
   }
   /**
    * 用户登入
    */
-  async login() {
+  async start() {
+    let { app, ctx } = this;
+    if (this.bot) {
+      console.log(0);
+      return Promise.resolve(true);
+    }
+    console.log(1);
+    this.data = app.wechatQueue[ctx.state.userid] = {
+      bot: null,
+      codeUrl: '',
+      contactList: null,
+      ai: {
+        roomArr: [],
+        personArr: [],
+        config: {}
+      }
+    }
     return new Promise((resolve, reject) => {
 
       const bot = new Wechaty({
         puppet,
-        name: 'wechat-' + this.ctx.state.userid
+        name: `wechat-${this.ctx.state.userid}-login.json`
       })
-      this.data = this.app.wechatQueue[this.ctx.state.userid] = {
-        source: bot,
-        status: 0,
-        codeUrl: '',
-        ai: {
-          roomArr: [],
-          personArr: [],
-          config: {}
-        }
-      }
+      this.data.bot = this.bot = bot;
       bot.on('scan', (qrcode, status) => {
         const codeUrl = this.config.wechat.loginUrl + qrcode;
         this.data.codeUrl = codeUrl
       })
       bot.on('login', (user) => {
-        this.data.status = 1
-
+        console.log(`${user} has logined`);
       })
       bot.on('logout', (user) => {
-        this.loginOut();
+        app.wechatQueue[ctx.state.userid] = null
+        delete app.wechatQueue[ctx.state.userid]
       })
       bot.on('error', (e) => console.error(e))
-      bot.start().then(()=>{
-        resolve();
-      }).catch(console.error)
+      bot.start().then(() => {
+        resolve(true);
+      }).catch((err) => {
+        ctx.throwBizError('WECHAT_START_FAIL')
+        console.error(err)
+      })
 
 
     })
 
   }
-  getCodeUrl() {
-    return this.data.codeUrl 
+  /**
+   * 获取微信登录的二维码
+   * 返回true则表面已经登录
+   */
+  getCode() {
+    if (!this.bot) {
+      this.ctx.throwBizError('WECHAT_NOT_START')
+    }
+    if(this.checkLogin(false)){
+       return true;
+    }
+    return this.data ? this.data.codeUrl : ''
   }
   /**
    * 微信用户登出
    */
-  async loginOut() {
+  async logout() {
+    console.log(3);
+    this.checkLogin();
+    let { app, ctx } = this;
+    await this.bot.logout();
     await this.bot.stop();
-    this.app.wechatQueue[this.ctx.state.userid] = null
-    delete this.app.wechatQueue[this.ctx.state.userid]
+    app.wechatQueue[ctx.state.userid] = null
+    delete app.wechatQueue[ctx.state.userid]
+    return true;
   }
   /**
- * 判断用户是否登入
+ * 检查是否登录
+ * @param {*} isThrow 是否抛出异常
  */
-  async isLogin() {
-    return this.status === 1;
+  checkLogin(isThrow = true) {
+    const isLogin = this.bot && this.bot.logonoff();
+    if (!isLogin && isThrow) {
+      this.ctx.throwBizError('WECHAT_NOT_LOGIN')
+    }
+    return isLogin;
   }
   /**
    * 获取全部的朋友
@@ -218,12 +245,7 @@ class WechatService extends Service {
     let data = await this.friends(query)
     return data
   }
-  //检查是否登录
-  checkLogin() {
-    if (!this.bot && this.status !== 1) {
-      this.ctx.throwBizError('WECHAT_NOT_LOGIN')
-    }
-  }
+
   //过滤联系人
   /**
  * @param {*} param1 
