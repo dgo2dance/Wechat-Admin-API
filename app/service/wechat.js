@@ -4,6 +4,7 @@ const Service = require('egg').Service
 const TencentAI = require('@khs1994/tencent-ai')
 const { Wechaty } = require('wechaty');
 const { puppet } = require('wechaty-puppet-puppeteer')
+const _ = require('lodash');
 class WechatService extends Service {
   constructor(args) {
     super(args);
@@ -17,10 +18,8 @@ class WechatService extends Service {
   async start() {
     let { app, ctx } = this;
     if (this.bot) {
-      console.log(0);
       return Promise.resolve(true);
     }
-    console.log(1);
     this.data = app.wechatQueue[ctx.state.userid] = {
       bot: null,
       codeUrl: '',
@@ -32,7 +31,6 @@ class WechatService extends Service {
       }
     }
     return new Promise((resolve, reject) => {
-
       const bot = new Wechaty({
         puppet,
         name: `wechat-${this.ctx.state.userid}-login.json`
@@ -49,14 +47,14 @@ class WechatService extends Service {
         app.wechatQueue[ctx.state.userid] = null
         delete app.wechatQueue[ctx.state.userid]
       })
-      bot.on('error', (e) => console.error(e))
+      bot.on('error', (e) => { console.error(e) })
       bot.start().then(() => {
-        resolve(true);
+
       }).catch((err) => {
         ctx.throwBizError('WECHAT_START_FAIL')
         console.error(err)
       })
-
+      resolve(true);
 
     })
 
@@ -69,16 +67,28 @@ class WechatService extends Service {
     if (!this.bot) {
       this.ctx.throwBizError('WECHAT_NOT_START')
     }
-    if(this.checkLogin(false)){
-       return true;
+    if (this.checkLogin(false)) {
+      return true;
     }
     return this.data ? this.data.codeUrl : ''
+  }
+  /**
+  * 微信用户登出
+  */
+  async chart() {
+
+    let data = await this.friends({});
+    let sexData = _.countBy(data, 'gender');
+    let provinceData = _.countBy(data, 'province');
+    return { sexData, provinceData }
+
+
+
   }
   /**
    * 微信用户登出
    */
   async logout() {
-    console.log(3);
     this.checkLogin();
     let { app, ctx } = this;
     await this.bot.logout();
@@ -104,15 +114,38 @@ class WechatService extends Service {
    */
   async friends(query) {
     this.checkLogin()
-    let contactList = [];
-    if (this.data.contactList) {
-      contactList = this.data.contactList;
-    } else {
-      contactList = await this.bot.Contact.findAll();
-      this.data.contactList = contactList;
-    }
-    return this.formatContacts(this.filterContacts(contactList || [], query));
+    // let contactList = [];
+    // if (this.data.contactList) {
+    //   contactList = this.data.contactList;
+    // } else {
+    //   contactList = await new Promise((resolve) => { setTimeout(async () => { resolve(await this.bot.Contact.findAll()); }, 2000) });
+    //   this.data.contactList = contactList;
+    // }
+    let contactList = await this.bot.Contact.findAll();
 
+    return this.setPaing(this.formatContacts(this.filterContacts(contactList || [], query)), query);
+
+
+  }
+  /**
+   * 数据分页
+   * @param {数据} data 
+   * @param {分页条件} query 
+   */
+  setPaing(data, query) {
+    const { pageIndex, pageSize, filed, sort } = query;
+    if (pageIndex === undefined && pageSize === undefined) {
+      return data;
+    }
+    let res = []
+    let pageCount = 0
+    let skip = ((Number(pageIndex || 1)) - 1) * Number(pageSize || 10);
+    if (filed && sort) {
+      data = data.sort((a, b) => { return sort > 0 ? a[filed] - b[filed] : b[filed] - a[filed] });
+    }
+    res = data.filter((item, index) => { return index >= skip && index < (skip + Number(pageSize)) })
+    pageCount = data.length
+    return { pageCount: pageCount, list: res, pageSize: Number(pageSize), pageIndex: Number(pageIndex) }
   }
 
   /**

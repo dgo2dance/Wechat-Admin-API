@@ -18,7 +18,13 @@ class WechatController extends Controller {
   // 判断用户是否登入
   async checkLogin() {
     const { ctx, service } = this
-    const res = await service.wechat.isLogin(false)
+    const res = await service.wechat.checkLogin(false)
+    ctx.helper.success({ ctx, res })
+  }
+  // 图表数据
+  async chart() {
+    const { ctx, service } = this
+    const res = await service.wechat.chart()
     ctx.helper.success({ ctx, res })
 
   }
