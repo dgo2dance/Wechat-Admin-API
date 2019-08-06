@@ -34,20 +34,31 @@ module.exports = {
     code: 10021,
     message: 'Role already exists'
   },
-  'WECHAT_START_FAIL': {
+  'AI_IS_EXIST': {
     status:200 ,
     code: 10031,
+    message: 'AI config already exists'
+  },
+  'AI_NOT_EXIST': {
+    status:200 ,
+    code: 10031,
+    message: 'AI config does not exists'
+  },
+  'WECHAT_START_FAIL': {
+    status:200 ,
+    code: 10053,
     message: 'Wechat start fail'
   },
   'WECHAT_NOT_START': {
     status:200 ,
-    code: 10041,
+    code: 10050,
     message: 'Wechat not start'
   },
   'WECHAT_NOT_LOGIN': {
     status:200 ,
     code: 10051,
     message: 'Wechat not login'
-  }
+  },
+ 
 }
 

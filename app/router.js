@@ -34,6 +34,9 @@ module.exports = app => {
   router.delete('/api/user',adminJwt, controller.user.removes)
   router.resources('user', '/api/user', adminJwt,controller.user)
 
+  // ai
+  router.resources('/api/ai', jwt, controller.ai)
+
   //wechat
   router.get('/api/wechat/chart', jwt, controller.wechat.chart)
   router.get('/api/wechat/logout', jwt, controller.wechat.logout)

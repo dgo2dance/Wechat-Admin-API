@@ -16,5 +16,7 @@ module.exports = {
   'Old password':'旧密码',
   'Wechat not login':'请先登录微信',
   'Wechat start fail':'微信启动失败',
-  'Wechat not start':'微信没有启动'
+  'Wechat not start':'微信没有启动',
+  'AI config already exists':'当前用户的AI配置已经存在',
+  'AI config does not exists':'当前用户的AI配置不存在'
 }

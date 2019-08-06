@@ -1,7 +1,7 @@
 'use strict'
 
 const Service = require('egg').Service
-const TencentAI = require('@khs1994/tencent-ai')
+const { TencentAI } = require('@khs1994/tencent-ai');
 const { Wechaty } = require('wechaty');
 const { puppet } = require('wechaty-puppet-puppeteer')
 const _ = require('lodash');
@@ -225,6 +225,10 @@ class WechatService extends Service {
 
       let text = msg.text();
       let hasAi = async function (arr, flag) {
+        //打招呼返回
+        if(text.indexOf(config.startText) >= 0){
+           return false;
+        }
         //判断开启AI的标识
         if (text.indexOf(config.startKey) >= 0) {
           arr.push(flag);
@@ -238,17 +242,17 @@ class WechatService extends Service {
           return false;
         }
         //判断此消息是否开启了AI聊天
-        return arr.indexOf(flag) < 0
+        return arr.indexOf(flag) >= 0
       }
       //只接受消息类型
       if (msg.type() !== this.bot.Message.Type.Text) {
         return false;
       }
       //群聊
-      if (msg.room() && !hasAi(this.data.ai.roomArr, await msg.room().topic())) {
+      if (msg.room() &&  !await hasAi(this.data.ai.roomArr, await msg.room().topic())) {
         return false;
         //个人
-      } else if (!msg.room() && !hasAi(this.data.ai.personArr, msg.from().name())) {
+      } else if (!msg.room() &&  !await hasAi(this.data.ai.personArr, msg.from().name())) {
         return false;
       }
 
@@ -257,11 +261,13 @@ class WechatService extends Service {
       } else if (!config.msgKey && msg.self()) {
         return false;
       }
-
+      
 
       try {
-        const data = await new TencentAI(config.appId, config.appKey).nlp(config.msgKey ? text.split(config.msgKey)[1].trim() : text.trim())
+        const ai = new TencentAI(config.appKey, config.appId);
+        const data = await ai.nlp.textChat(config.msgKey ? text.split(config.msgKey)[1].trim() : text.trim(),'session_id')
         await msg.say(data.data.answer)
+  
 
       } catch (e) {
         console.error(e && e.message || e)

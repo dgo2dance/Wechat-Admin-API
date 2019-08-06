@@ -19,11 +19,11 @@ module.exports = appInfo => {
       enable: false,
       ignoreJSON: true
     },
-    domainWhiteList: ['http://localhost:8080','http://we.blackfe.com'],
+    domainWhiteList: ['http://localhost:8080'],
   }
   config.cors = {
     credentials: true, 
-    origin:['http://localhost:8080','http://we.blackfe.com'],
+    origin:['http://localhost:8080'],
     allowMethods: 'GET,HEAD,PUT,POST,DELETE,PATCH'
   };
 
