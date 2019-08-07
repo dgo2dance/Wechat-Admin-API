@@ -44,10 +44,10 @@ module.exports = {
     code: 10031,
     message: 'AI config does not exists'
   },
-  'WECHAT_START_FAIL': {
+  'WECHAT_LOGIN_FAIL': {
     status:200 ,
     code: 10053,
-    message: 'Wechat start fail'
+    message: 'Your account cannot login page version WeChat'
   },
   'WECHAT_NOT_START': {
     status:200 ,

@@ -64,10 +64,9 @@ class WechatController extends Controller {
     ctx.helper.success({ ctx, res })
   }
   //开启机器人聊天
-  async MessageAi() {
+  async MessageAiRun() {
     const { ctx, service } = this
-    const query = ctx.query || {}
-    const res = await service.wechat.MessageAi(query)
+    const res = await service.wechat.MessageAiRun()
     ctx.helper.success({ ctx, res })
   }
   //导出

@@ -35,7 +35,11 @@ module.exports = app => {
   router.resources('user', '/api/user', adminJwt,controller.user)
 
   // ai
-  router.resources('/api/ai', jwt, controller.ai)
+  router.get('/api/ai', jwt, controller.ai.show)
+  router.put('/api/ai', jwt, controller.ai.update)
+  router.delete('/api/ai', jwt, controller.ai.destroy)
+  router.post('/api/ai', jwt, controller.ai.create)
+
 
   //wechat
   router.get('/api/wechat/chart', jwt, controller.wechat.chart)
@@ -48,5 +52,5 @@ module.exports = app => {
   router.get('/api/wechat/rooms', jwt, controller.wechat.rooms)
   router.get('/api/wechat/rooms/members', jwt, controller.wechat.RoomMembers)
   router.get('/api/wechat/rooms/members/add', jwt, controller.wechat.RoomMembersAdd)
-  router.get('/api/wechat/message/ai', jwt, controller.wechat.MessageAi)
+  router.get('/api/wechat/message/ai', jwt, controller.wechat.MessageAiRun)
 }

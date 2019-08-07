@@ -18,5 +18,6 @@ module.exports = {
   'Wechat start fail':'微信启动失败',
   'Wechat not start':'微信没有启动',
   'AI config already exists':'当前用户的AI配置已经存在',
-  'AI config does not exists':'当前用户的AI配置不存在'
+  'AI config does not exists':'当前用户的AI配置不存在',
+  'Your account cannot login page version WeChat':'您的帐号无法登录网页版微信'
 }

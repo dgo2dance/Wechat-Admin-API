@@ -107,17 +107,7 @@ module.exports = appInfo => {
     tokenExpire: 3600*24
   }
   config.wechat = {
-    loginUrl: 'https://api.qrserver.com/v1/create-qr-code/?data=',
-    tencentAi: {
-      appId: '2117405317',
-      appKey: 'cf2rk3HHzm1nLRPA',
-      startText:'开启机器人聊天。在消息开头加上小黑，则机器人会自动回复。若想关闭，请回复，回家吧小黑',
-      startKey:'出现吧小黑',
-      endKey:'回家吧小黑',
-      endText:'机器人聊天模式已经关闭',
-      msgKey:'小黑'
-      
-    }
+    loginUrl: 'https://api.qrserver.com/v1/create-qr-code/?data='
   }
   return config
 }

@@ -11,36 +11,28 @@ class AiService extends Service {
     return ctx.model.Ai.create(payload)
   }
 
-  async destroy(_id) {
-    const { ctx, service } = this
-    const ai = await ctx.service.ai.find(_id)
-    !ai && ctx.throwBizError('AI_NOT_EXIST')
-    return ctx.model.Ai.findByIdAndRemove(_id)
-  }
-
-
-  async update(_id, payload) {
+  async destroy() {
     const { ctx } = this
-    const ai = await ctx.service.ai.find(_id)
+    const ai = await this.show();
     !ai && ctx.throwBizError('AI_NOT_EXIST')
-    return ctx.model.Ai.findByIdAndUpdate(_id, payload)
+    return ctx.model.Ai.findByIdAndRemove(ai._id)
   }
 
-  async show(_id) {
+
+  async update( payload) {
     const { ctx } = this
-    const ai = await ctx.service.ai.find(_id)
+    const ai = await this.show();
     !ai && ctx.throwBizError('AI_NOT_EXIST')
-    return ctx.model.Ai.findById(_id, '_id appId appKey status startText startKey endKey endText msgKey ctime')
+    return  this.ctx.model.Ai.findByIdAndUpdate(ai._id, payload) 
   }
 
+  async show() {
+    const { ctx } = this
+    const _id = ctx.locals.userid
+    return await ctx.model.Ai.findOne({userId:_id},'_id appId appKey status startText startKey endKey endText msgKey ctime')
 
-  async find(id, options) {
-    return this.ctx.model.Ai.findById(id, options)
   }
 
-  async findByIdAndUpdate(id, values) {
-    return this.ctx.model.Ai.findByIdAndUpdate(id, values)
-  }
 
 }
 module.exports = AiService

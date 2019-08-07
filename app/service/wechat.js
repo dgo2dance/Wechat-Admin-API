@@ -24,6 +24,7 @@ class WechatService extends Service {
       bot: null,
       codeUrl: '',
       contactList: null,
+      error:'',
       ai: {
         roomArr: [],
         personArr: [],
@@ -41,19 +42,24 @@ class WechatService extends Service {
         this.data.codeUrl = codeUrl
       })
       bot.on('login', (user) => {
+        this.loginAfterService();
         console.log(`${user} has logined`);
       })
       bot.on('logout', (user) => {
         app.wechatQueue[ctx.state.userid] = null
         delete app.wechatQueue[ctx.state.userid]
       })
-      bot.on('error', (e) => { console.error(e) })
-      bot.start().then(() => {
-
-      }).catch((err) => {
-        ctx.throwBizError('WECHAT_START_FAIL')
+      bot.on('error', (e) => {
+        this.data.error = e;
+         console.error(e) 
+      })
+      bot.start().catch((err) => { 
         console.error(err)
       })
+      this.bot.on('message', async (msg) => {
+        await this.MessageAi(msg);
+      })
+
       resolve(true);
 
     })
@@ -103,6 +109,9 @@ class WechatService extends Service {
  */
   checkLogin(isThrow = true) {
     const isLogin = this.bot && this.bot.logonoff();
+    if(this.data && this.data.error){
+      this.ctx.throwBizError('WECHAT_LOGIN_FAIL')
+    }
     if (!isLogin && isThrow) {
       this.ctx.throwBizError('WECHAT_NOT_LOGIN')
     }
@@ -200,79 +209,76 @@ class WechatService extends Service {
     this.app.runSchedule('wehcat_add_contact')
   }
   /**
- * 设置机器人聊天
- * @param {*} query 
- * status 是否开启 0关闭 1开启
- * startText 开启的返回消息
- * startKey 开启的标识
- * endText 关闭的返回消息
- * endKey 关闭的标识
- * msgKey 判断是否AI回复此消息的标识
+   * 登录成功之后运行的服务
+   */
+  loginAfterService() {
+    this.MessageAiRun();
+  }
+  /**
+   * 运行机器人聊天
+   */
+  async MessageAiRun() {
+    let { ctx } = this;
+    const aiConfig = await ctx.model.Ai.findOne({ userId: ctx.locals.userid });
+    this.data.ai.config = aiConfig || {};
+    return true;
+  }
+  /**
+ * 机器人聊天
  */
-  async MessageAi(query) {
-    this.checkLogin();
+  async MessageAi(msg) {
+    let config = this.data.ai.config;
 
-    if (this.data.ai.config.status === 1) {
+    if (!config.status) {
       return false;
     }
-    this.data.ai.config = Object.assign({}, this.data.ai.config, this.config.wechat.tencentAi, query);
-    this.bot.on('message', async function (msg) {
-      let config = this.data.ai.config;
 
-      if (!config.status) {
+    let text = msg.text();
+    let hasAi = async (arr, flag) => {
+      //打招呼返回
+      if (text.indexOf(config.startText) >= 0) {
         return false;
       }
+      //判断开启AI的标识
+      if (text.indexOf(config.startKey) >= 0) {
+        arr.push(flag);
+        await msg.say(config.startText)
+        return false;
+      }
+      //判断关闭AI的标识
+      if (text.indexOf(config.endKey) >= 0 && arr.indexOf(flag) >= 0) {
+        arr.splice(arr.indexOf(flag), 1);
+        await msg.say(config.endText)
+        return false;
+      }
+      //判断此消息是否开启了AI聊天
+      return arr.indexOf(flag) >= 0
+    }
+    //只接受消息类型
+    if (msg.type() !== this.bot.Message.Type.Text) {
+      return false;
+    }
+    //群聊
+    if (msg.room() && !await hasAi(this.data.ai.roomArr, await msg.room().topic())) {
+      return false;
+      //个人
+    } else if (!msg.room() && !await hasAi(this.data.ai.personArr, msg.from().name())) {
+      return false;
+    }
 
-      let text = msg.text();
-      let hasAi = async function (arr, flag) {
-        //打招呼返回
-        if(text.indexOf(config.startText) >= 0){
-           return false;
-        }
-        //判断开启AI的标识
-        if (text.indexOf(config.startKey) >= 0) {
-          arr.push(flag);
-          await msg.say(config.startText)
-          return false;
-        }
-        //判断关闭AI的标识
-        if (text.indexOf(config.endKey) >= 0 && arr.indexOf(flag) >= 0) {
-          arr.splice(arr.indexOf(flag), 1);
-          await msg.say(config.endText)
-          return false;
-        }
-        //判断此消息是否开启了AI聊天
-        return arr.indexOf(flag) >= 0
-      }
-      //只接受消息类型
-      if (msg.type() !== this.bot.Message.Type.Text) {
-        return false;
-      }
-      //群聊
-      if (msg.room() &&  !await hasAi(this.data.ai.roomArr, await msg.room().topic())) {
-        return false;
-        //个人
-      } else if (!msg.room() &&  !await hasAi(this.data.ai.personArr, msg.from().name())) {
-        return false;
-      }
+    if (config.msgKey && text.indexOf(config.msgKey) < 0) {
+      return false;
+    } else if (!config.msgKey && msg.self()) {
+      return false;
+    }
 
-      if (config.msgKey && text.indexOf(config.msgKey) < 0) {
-        return false;
-      } else if (!config.msgKey && msg.self()) {
-        return false;
-      }
-      
-
-      try {
-        const ai = new TencentAI(config.appKey, config.appId);
-        const data = await ai.nlp.textChat(config.msgKey ? text.split(config.msgKey)[1].trim() : text.trim(),'session_id')
-        await msg.say(data.data.answer)
-  
-
-      } catch (e) {
-        console.error(e && e.message || e)
-      }
-    }.bind(this))
+    try {
+      const ai = new TencentAI(config.appKey, config.appId);
+      const data = await ai.nlp.textChat(config.msgKey ? text.split(config.msgKey)[1].trim() : text.trim(), 'session_id')
+      await msg.say(data.data.answer)
+    } catch (e) {
+      console.error(e && e.message || e)
+    }
 
   }
   /**
