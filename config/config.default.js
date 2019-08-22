@@ -104,7 +104,7 @@ module.exports = appInfo => {
     resultHandle: (result) => { return { result } } // fromat result
   }
   config.app = {
-    tokenExpire: 3600*24
+    tokenExpire: 3600*24*30
   }
   config.wechat = {
     loginUrl: 'https://api.qrserver.com/v1/create-qr-code/?data='
