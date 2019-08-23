@@ -21,7 +21,7 @@ class CrawlerConstellation extends Subscription {
             { key: 'leo', name: '狮子座', data: [] },
             { key: 'virgo', name: '处女座', data: [] },
             { key: 'libra', name: '天秤座', data: [] },
-            { key: 'virgo', name: '天蝎座', data: [] },
+            { key: 'scorpio', name: '天蝎座', data: [] },
             { key: 'sagittarius', name: '射手座', data: [] },
             { key: 'capricorn', name: '摩羯座', data: [] },
             { key: 'aquarius', name: '水瓶座', data: [] },
