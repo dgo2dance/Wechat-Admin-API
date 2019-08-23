@@ -65,7 +65,7 @@ class CrawlerConstellation extends Subscription {
                     study: getContent("3"),//事业学业
                     studyStar: getStar("3"),//事业学业星数
                     wealth: getContent("4"),//财富运势
-                    wealthStar: getIndex("4"),//财富星数
+                    wealthStar: getStar("4"),//财富星数
                     health: getContent("5"),//健康运势
                     healthIndex: getIndex("5"),//健康指数
                     BusinessIndex: getIndex("6"),//商谈指数
