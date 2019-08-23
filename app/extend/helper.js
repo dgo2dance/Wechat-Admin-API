@@ -25,7 +25,7 @@ exports.loginToken = (data, expires = 7200) => {
   return token
 }
 
-exports.filterObject = (raw,allowed)=>{
+exports.filterObject = (raw, allowed) => {
   return Object.keys(raw)
     .filter(key => allowed.includes(key))
     .reduce((obj, key) => {
@@ -34,3 +34,11 @@ exports.filterObject = (raw,allowed)=>{
     }, {})
 }
 
+exports.findObjInArr = (arr, key, value) => {
+  for (let i = 0; i < arr.length; i++) {
+    if (arr[i][key] == value) {
+      return { item: arr[i], index: i };
+    }
+  }
+  return {};
+}
