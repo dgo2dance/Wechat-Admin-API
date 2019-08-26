@@ -58,6 +58,7 @@ class WechatService extends Service {
         console.error(err)
       })
       this.bot.on('message', async (msg) => {
+        await this.getRecalledMsg(msg);
         await this.MessageAi(msg);
       })
 
@@ -134,7 +135,7 @@ class WechatService extends Service {
     let contactList = await this.bot.Contact.findAll();
 
     return this.setPaing(this.formatContacts(this.filterContacts(contactList || [], query)), query);
-  
+
 
   }
   /**
@@ -225,6 +226,19 @@ class WechatService extends Service {
     return true;
   }
   /**
+   * 获取撤回消息
+   */
+  async getRecalledMsg(msg) {
+    if (msg.type() === this.bot.Message.Type.Recalled) {
+      const recalledMsg = await msg.toRecalled();
+      if(recalledMsg){
+        if (recalledMsg.type() === this.bot.Message.Type.Text) {
+          this.ctx.model.Recall.create({ name: msg.from().name(), topic: msg.room() ? await msg.room().topic() : '', content: recalledMsg.text(), ctime: new Date() })
+        }  
+      }
+    }
+  }
+  /**
  * 机器人聊天
  */
   async MessageAi(msg) {
@@ -276,37 +290,49 @@ class WechatService extends Service {
     try {
       const content = config.msgKey ? text.split(config.msgKey)[1].trim() : text.trim();
       let constellation = await this.getConstellation(content);
-      if(constellation){
+      if (constellation) {
         await msg.say(constellation)
-      }else{
+      }else if(content.indexOf('撤回消息')>=0 ){
+        let data = await this.ctx.model.Recall.find({ name: msg.from().name() ,topic: msg.room() ? await msg.room().topic() : '' })
+        if(data && data.length >=1){
+          let str = "";
+          data.forEach((item)=>{
+            str+=`【时间】${moment(item.ctime).format('YYYY-MM-DD HH:mm:ss')}\n【姓名】${item.name}\n【内容】${item.content}\n\n`
+          })
+          await msg.say(str)
+        }else{
+          await msg.say('没有监听到撤回消息')
+        }
+     
+      }else {
         const ai = new TencentAI(config.appKey, config.appId);
         const data = await ai.nlp.textChat(content, 'session_id');
         await msg.say(data.data.answer)
       }
-     
-     
+
+
     } catch (e) {
       console.error(e && e.message || e)
     }
 
   }
-  async getConstellation(msg){
-    const constellation = ['白羊座','金牛座','双子座','巨蟹座','狮子座','处女座','天秤座','天蝎座','射手座','摩羯座','水瓶座', '双鱼座'];
+  async getConstellation(msg) {
+    const constellation = ['白羊座', '金牛座', '双子座', '巨蟹座', '狮子座', '处女座', '天秤座', '天蝎座', '射手座', '摩羯座', '水瓶座', '双鱼座'];
     let current = "";
-    for( let i = 0 ;i<constellation.length;i++ ){
-       if(msg.indexOf(constellation[i]) >=0 ){
-         current = constellation[i];
-         break;
-       }
+    for (let i = 0; i < constellation.length; i++) {
+      if (msg.indexOf(constellation[i]) >= 0) {
+        current = constellation[i];
+        break;
+      }
     }
-    if(current){
-      let  result = await  this.ctx.model.Constellation.findOne({ date:moment().format('YYYY-MM-DD') });
-      if(result){
-         let data = this.ctx.helper.findObjInArr(result.data,'name',current).item;
-         if(data){
-            let content = data.data;
-            return `${current}今日运势：\n【综合运势】${content.total}\n【爱情运势】${content.love}\n【事业学业】${content.study}\n【财富运势】${content.wealth}\n【健康运势】${content.health}\n【短评】${content.intr}\n\n综合星级：${content.totalStar}颗心\n爱情星级：${content.loveStar}颗心\n事业学业星级：${content.studyStar}颗心\n财富星级：${content.wealthStar}颗心\n健康指数：${content.healthIndex}\n商谈指数：${content.BusinessIndex}\n幸运颜色：${content.luckyColor}\n幸运数字：${content.luckyNumber}\n速配星座：${content.match}\n`
-         } 
+    if (current) {
+      let result = await this.ctx.model.Constellation.findOne({ date: moment().format('YYYY-MM-DD') });
+      if (result) {
+        let data = this.ctx.helper.findObjInArr(result.data, 'name', current).item;
+        if (data) {
+          let content = data.data;
+          return `${current}今日运势：\n【综合运势】${content.total}\n【爱情运势】${content.love}\n【事业学业】${content.study}\n【财富运势】${content.wealth}\n【健康运势】${content.health}\n【短评】${content.intr}\n\n综合星级：${content.totalStar}颗心\n爱情星级：${content.loveStar}颗心\n事业学业星级：${content.studyStar}颗心\n财富星级：${content.wealthStar}颗心\n健康指数：${content.healthIndex}\n商谈指数：${content.BusinessIndex}\n幸运颜色：${content.luckyColor}\n幸运数字：${content.luckyNumber}\n速配星座：${content.match}\n`
+        }
       }
     }
     return "";
