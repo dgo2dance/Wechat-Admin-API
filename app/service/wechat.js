@@ -294,7 +294,7 @@ class WechatService extends Service {
       if (constellation) {
         await msg.say(constellation)
       }else if(loveWords){
-        await msg.say(constellation)
+        await msg.say(loveWords)
       } else if (content.indexOf('撤回消息') >= 0) {
         let data = await this.ctx.model.Recall.find({ name: msg.from().name(), topic: msg.room() ? await msg.room().topic() : '' })
         if (data && data.length >= 1) {
