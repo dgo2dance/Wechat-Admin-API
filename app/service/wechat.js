@@ -231,10 +231,10 @@ class WechatService extends Service {
   async getRecalledMsg(msg) {
     if (msg.type() === this.bot.Message.Type.Recalled) {
       const recalledMsg = await msg.toRecalled();
-      if(recalledMsg){
+      if (recalledMsg) {
         if (recalledMsg.type() === this.bot.Message.Type.Text) {
           this.ctx.model.Recall.create({ name: msg.from().name(), topic: msg.room() ? await msg.room().topic() : '', content: recalledMsg.text(), ctime: new Date() })
-        }  
+        }
       }
     }
   }
@@ -290,21 +290,24 @@ class WechatService extends Service {
     try {
       const content = config.msgKey ? text.split(config.msgKey)[1].trim() : text.trim();
       let constellation = await this.getConstellation(content);
+      let loveWords =  await this.getLoveWords();
       if (constellation) {
         await msg.say(constellation)
-      }else if(content.indexOf('撤回消息')>=0 ){
-        let data = await this.ctx.model.Recall.find({ name: msg.from().name() ,topic: msg.room() ? await msg.room().topic() : '' })
-        if(data && data.length >=1){
+      }else if(loveWords){
+        await msg.say(constellation)
+      } else if (content.indexOf('撤回消息') >= 0) {
+        let data = await this.ctx.model.Recall.find({ name: msg.from().name(), topic: msg.room() ? await msg.room().topic() : '' })
+        if (data && data.length >= 1) {
           let str = "";
-          data.forEach((item)=>{
-            str+=`【时间】${moment(item.ctime).format('YYYY-MM-DD HH:mm:ss')}\n【姓名】${item.name}\n【内容】${item.content}\n\n`
+          data.forEach((item) => {
+            str += `【时间】${moment(item.ctime).format('YYYY-MM-DD HH:mm:ss')}\n【姓名】${item.name}\n【内容】${item.content}\n\n`
           })
           await msg.say(str)
-        }else{
+        } else {
           await msg.say('没有监听到撤回消息')
         }
-     
-      }else {
+
+      } else {
         const ai = new TencentAI(config.appKey, config.appId);
         const data = await ai.nlp.textChat(content, 'session_id');
         await msg.say(data.data.answer)
@@ -336,6 +339,20 @@ class WechatService extends Service {
       }
     }
     return "";
+  }
+  async getLoveWords(msg) {
+    let key = "渣男情话";
+    if (msg.indexOf(key) >= 0) {
+      let result = await ctx.curl('https://api.lovelive.tools/api/SweetNothings/WebSite/1', {
+        // 自动解析 JSON response
+        dataType: 'json',
+        // 3 秒超时
+        timeout: 3000,
+      });
+      let data = result.data?result.data[0]: {}
+      return data.content;
+    }
+    return '';
   }
   /**
    * 导出
