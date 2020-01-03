@@ -290,7 +290,7 @@ class WechatService extends Service {
     try {
       const content = config.msgKey ? text.split(config.msgKey)[1].trim() : text.trim();
       let constellation = await this.getConstellation(content);
-      let loveWords =  await this.getLoveWords();
+      let loveWords =  await this.getLoveWords(content);
       if (constellation) {
         await msg.say(constellation)
       }else if(loveWords){
