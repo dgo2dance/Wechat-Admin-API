@@ -343,7 +343,7 @@ class WechatService extends Service {
   async getLoveWords(msg) {
     let key = "渣男情话";
     if (msg.indexOf(key) >= 0) {
-      let result = await ctx.curl('https://api.lovelive.tools/api/SweetNothings/WebSite/1', {
+      let result = await this.ctx.curl('https://api.lovelive.tools/api/SweetNothings/WebSite/1', {
         // 自动解析 JSON response
         dataType: 'json',
         // 3 秒超时
